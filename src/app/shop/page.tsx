@@ -1,0 +1,141 @@
+"use client";
+
+import { useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { PRODUCTS } from "@/data/products";
+import { ProductCard } from "@/components/ui/ProductCard";
+import { ProductGrid } from "@/components/ui/ProductGrid";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { ProductFilters } from "@/components/shop/ProductFilters";
+import { SortDropdown, SortOption } from "@/components/shop/SortDropdown";
+
+function ShopContent({ initialCategory }: { initialCategory?: string }) {
+  const searchParams = useSearchParams();
+  const initialFilter = searchParams.get("filter");
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialCategory ? [initialCategory] : []
+  );
+  
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(
+    initialFilter === "new" ? ["New"] : initialFilter === "best-seller" ? ["Best Seller"] : []
+  );
+  
+  const [sortBy, setSortBy] = useState<SortOption>("featured");
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  const handleCategoryToggle = (categoryId: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const handleFeatureToggle = (feature: string) => {
+    setSelectedFeatures((prev) =>
+      prev.includes(feature)
+        ? prev.filter((f) => f !== feature)
+        : [...prev, feature]
+    );
+  };
+
+  const filteredProducts = useMemo(() => {
+    let result = [...PRODUCTS];
+
+    if (selectedCategories.length > 0) {
+      result = result.filter((p) => selectedCategories.includes(p.category.toLowerCase()));
+    }
+
+    if (selectedFeatures.length > 0) {
+      result = result.filter((p) => {
+        const hasFeatures = selectedFeatures.filter(f => f !== "New" && f !== "Best Seller").every(f => p.features.includes(f));
+        const hasNew = selectedFeatures.includes("New") ? p.isNew : true;
+        const hasBestSeller = selectedFeatures.includes("Best Seller") ? p.isBestSeller : true;
+        return hasFeatures && hasNew && hasBestSeller;
+      });
+    }
+
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        result.sort((a, b) => (a.isNew === b.isNew ? 0 : a.isNew ? -1 : 1));
+        break;
+      case "best-selling":
+        result.sort((a, b) => (a.isBestSeller === b.isBestSeller ? 0 : a.isBestSeller ? -1 : 1));
+        break;
+      case "featured":
+      default:
+        result.sort((a, b) => (a.isFeatured === b.isFeatured ? 0 : a.isFeatured ? -1 : 1));
+        break;
+    }
+
+    return result;
+  }, [selectedCategories, selectedFeatures, sortBy]);
+
+  return (
+    <div className="container mx-auto px-4 md:px-8 py-12">
+      <Breadcrumb items={[{ label: "Home", href: "/" }, { label: initialCategory ? initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1) : "Shop All" }]} />
+      
+      <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-12 gap-4">
+        <div>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium mb-2">
+            {initialCategory ? initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1) : "Shop All Jewelry"}
+          </h1>
+          <p className="text-gray-500">Everyday pieces designed to shine longer. ({filteredProducts.length} items)</p>
+        </div>
+        
+        <SortDropdown value={sortBy} onChange={setSortBy} />
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-12">
+        <aside className="w-full md:w-64 flex-shrink-0">
+          <ProductFilters
+            selectedCategories={selectedCategories}
+            selectedFeatures={selectedFeatures}
+            onCategoryToggle={handleCategoryToggle}
+            onFeatureToggle={handleFeatureToggle}
+            isOpen={isMobileFiltersOpen}
+            setIsOpen={setIsMobileFiltersOpen}
+          />
+        </aside>
+
+        <div className="flex-1">
+          {filteredProducts.length > 0 ? (
+            <ProductGrid columns={3}>
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </ProductGrid>
+          ) : (
+            <div className="text-center py-24 text-gray-500">
+              <p className="text-lg">No pieces found matching your criteria.</p>
+              <button 
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setSelectedFeatures([]);
+                }}
+                className="btn-secondary mt-6"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-24 text-center">Loading...</div>}>
+      <ShopContent />
+    </Suspense>
+  );
+}

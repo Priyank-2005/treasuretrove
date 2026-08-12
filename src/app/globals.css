@@ -1,1 +1,48 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-ivory: #fcfbf9;
+  --color-brand-champagne: #f5eee6;
+  --color-brand-charcoal: #2d2d2d;
+  --color-brand-gold: #d4af37;
+  --color-brand-gold-light: #f1e5c3;
+  --color-brand-sand: #eaddcf;
+  
+  --font-serif: var(--font-cormorant), serif;
+  --font-sans: var(--font-inter), sans-serif;
+  
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-brand-ivory);
+    color: var(--color-brand-charcoal);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-charcoal text-white px-8 py-3 rounded-none hover:bg-black transition-colors uppercase tracking-widest text-sm font-medium;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent border border-brand-charcoal text-brand-charcoal px-8 py-3 rounded-none hover:bg-brand-charcoal hover:text-white transition-colors uppercase tracking-widest text-sm font-medium;
+  }
+
+  .nav-link {
+    @apply text-sm uppercase tracking-widest text-brand-charcoal hover:text-brand-gold transition-colors;
+  }
+}
+
+/* Hide scrollbar for clean horizontal scrolls */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
