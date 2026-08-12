@@ -26,15 +26,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-charcoal text-white px-8 py-3 rounded-none hover:bg-black transition-colors uppercase tracking-widest text-sm font-medium;
+    @apply bg-[#2d2d2d] text-white px-8 py-3 rounded-none hover:bg-black transition-colors uppercase tracking-widest text-sm font-medium;
   }
   
   .btn-secondary {
-    @apply bg-transparent border border-brand-charcoal text-brand-charcoal px-8 py-3 rounded-none hover:bg-brand-charcoal hover:text-white transition-colors uppercase tracking-widest text-sm font-medium;
+    @apply bg-transparent border border-[#2d2d2d] text-[#2d2d2d] px-8 py-3 rounded-none hover:bg-[#2d2d2d] hover:text-white transition-colors uppercase tracking-widest text-sm font-medium;
   }
 
   .nav-link {
-    @apply text-sm uppercase tracking-widest text-brand-charcoal hover:text-brand-gold transition-colors;
+    @apply text-sm uppercase tracking-widest text-[#2d2d2d] hover:text-[#d4af37] transition-colors;
   }
 }
 

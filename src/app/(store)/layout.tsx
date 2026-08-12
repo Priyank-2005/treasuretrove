@@ -5,7 +5,7 @@ import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
-import "./globals.css";
+import "../globals.css";
 import { BRAND } from "@/config/brand";
 
 const cormorant = Cormorant_Garamond({
