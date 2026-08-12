@@ -3,16 +3,18 @@
 import { usePathname } from "next/navigation";
 import { Bell, Search, Menu } from "lucide-react";
 import Link from "next/link";
+import { useAdmin } from "@/context/AdminContext";
 
 export function AdminHeader() {
   const pathname = usePathname();
+  const { setMobileMenuOpen } = useAdmin();
   
   if (pathname === "/admin/login") return null;
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 flex-shrink-0 z-10">
       <div className="flex items-center gap-4">
-        <button className="md:hidden text-gray-500 hover:text-gray-900">
+        <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-gray-500 hover:text-gray-900">
           <Menu className="w-6 h-6" />
         </button>
         

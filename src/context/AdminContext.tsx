@@ -33,6 +33,8 @@ interface AdminContextType {
   
   resetDemoData: () => void;
   isHydrated: boolean;
+  isMobileMenuOpen: boolean;
+  setMobileMenuOpen: (open: boolean) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -44,6 +46,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [coupons, setCoupons] = useState<Coupon[]>(MOCK_COUPONS);
   const [campaigns, setCampaigns] = useState<Campaign[]>(MOCK_CAMPAIGNS);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const savedProducts = localStorage.getItem("lumera_admin_products");
@@ -148,6 +151,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         addCampaign,
         resetDemoData,
         isHydrated,
+        isMobileMenuOpen,
+        setMobileMenuOpen,
       }}
     >
       {children}

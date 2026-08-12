@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShoppingBag, ShoppingCart, Users, Tag, Megaphone, BarChart3, Settings, LogOut, HelpCircle } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, ShoppingCart, Users, Tag, Megaphone, BarChart3, Settings, LogOut, HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAdmin } from "@/context/AdminContext";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -18,27 +19,45 @@ const NAV_ITEMS = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { isMobileMenuOpen, setMobileMenuOpen } = useAdmin();
 
   // Hide sidebar on login page
   if (pathname === "/admin/login") return null;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col hidden md:flex h-full">
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
-        <Link href="/admin" className="font-serif text-2xl font-semibold tracking-wider text-brand-charcoal">
-          LUMÉRA
-        </Link>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
+      <aside className={cn(
+        "bg-white border-r border-gray-200 flex-shrink-0 flex flex-col h-full z-50 transition-transform md:translate-x-0 md:static md:flex",
+        "fixed inset-y-0 left-0 w-64 transform",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full hidden md:block"
+      )}>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
+          <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="font-serif text-2xl font-semibold tracking-wider text-brand-charcoal">
+            LUMÉRA
+          </Link>
+          <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-gray-500 hover:text-gray-900">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-      <div className="flex-1 py-6 flex flex-col gap-1 overflow-y-auto hide-scrollbar">
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-          const Icon = item.icon;
-          
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
+        <div className="flex-1 py-6 flex flex-col gap-1 overflow-y-auto hide-scrollbar">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+            const Icon = item.icon;
+            
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 "flex items-center gap-3 px-6 py-2.5 mx-3 rounded-md text-sm font-medium transition-colors",
                 isActive 
@@ -64,5 +83,6 @@ export function AdminSidebar() {
         </Link>
       </div>
     </aside>
+    </>
   );
 }
