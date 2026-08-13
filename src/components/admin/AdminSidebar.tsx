@@ -41,7 +41,7 @@ export function AdminSidebar() {
       )}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
           <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="font-serif text-2xl font-semibold tracking-wider text-brand-charcoal">
-            LUMÉRA
+            Treasure Trove
           </Link>
           <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-gray-500 hover:text-gray-900">
             <X className="w-5 h-5" />

@@ -17,7 +17,7 @@ export default function AboutPage() {
         
         <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed max-w-2xl text-center md:text-left">
           <p className="mb-6">
-            LUMÉRA was born out of a simple desire: to create beautiful, modern jewelry that doesn't tarnish after a few wears or irritate sensitive skin. We believe that everyday luxury shouldn't come with a premium price tag or require high maintenance.
+            Treasure Trove was born out of a simple desire: to create beautiful, modern jewelry that doesn't tarnish after a few wears or irritate sensitive skin. We believe that everyday luxury shouldn't come with a premium price tag or require high maintenance.
           </p>
           <p className="mb-6">
             We noticed a gap in the market. On one end, there was expensive fine jewelry reserved for special occasions. On the other, cheap fashion jewelry that quickly lost its shine. We wanted something in the middle.

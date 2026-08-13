@@ -7,7 +7,7 @@ export function HeroSection() {
     <section className="relative h-[85vh] min-h-[600px] w-full bg-brand-champagne overflow-hidden">
       <Image
         src="/images/banners/hero.jpg"
-        alt="LUMÉRA Everyday Jewelry, Elevated"
+        alt="Treasure Trove Everyday Jewelry, Elevated"
         fill
         priority
         className="object-cover"

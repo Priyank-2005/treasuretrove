@@ -49,10 +49,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem("lumera_admin_products");
-    const savedOrders = localStorage.getItem("lumera_admin_orders");
-    const savedCoupons = localStorage.getItem("lumera_admin_coupons");
-    const savedCampaigns = localStorage.getItem("lumera_admin_campaigns");
+    const savedProducts = localStorage.getItem("treasuretrove_admin_products");
+    const savedOrders = localStorage.getItem("treasuretrove_admin_orders");
+    const savedCoupons = localStorage.getItem("treasuretrove_admin_coupons");
+    const savedCampaigns = localStorage.getItem("treasuretrove_admin_campaigns");
     
     if (savedProducts) setProducts(JSON.parse(savedProducts));
     if (savedOrders) setOrders(JSON.parse(savedOrders));
@@ -69,62 +69,62 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const addProduct = (product: Product) => {
     const updated = [product, ...products];
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const updateProduct = (product: Product) => {
     const updated = products.map((p) => (p.id === product.id ? product : p));
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const deleteProduct = (id: string) => {
     const updated = products.filter((p) => p.id !== id);
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const bulkUpdateProducts = (ids: string[], updates: Partial<Product>) => {
     const updated = products.map((p) => (ids.includes(p.id) ? { ...p, ...updates } : p));
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const bulkDeleteProducts = (ids: string[]) => {
     const updated = products.filter((p) => !ids.includes(p.id));
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const importProducts = (newProducts: Product[]) => {
     const updated = [...newProducts, ...products];
     setProducts(updated);
-    saveToStorage("lumera_admin_products", updated);
+    saveToStorage("treasuretrove_admin_products", updated);
   };
 
   const updateOrderStatus = (id: string, status: Order["status"]) => {
     const updated = orders.map((o) => (o.id === id ? { ...o, status } : o));
     setOrders(updated);
-    saveToStorage("lumera_admin_orders", updated);
+    saveToStorage("treasuretrove_admin_orders", updated);
   };
 
   const addCoupon = (coupon: Coupon) => {
     const updated = [coupon, ...coupons];
     setCoupons(updated);
-    saveToStorage("lumera_admin_coupons", updated);
+    saveToStorage("treasuretrove_admin_coupons", updated);
   };
 
   const addCampaign = (campaign: Campaign) => {
     const updated = [campaign, ...campaigns];
     setCampaigns(updated);
-    saveToStorage("lumera_admin_campaigns", updated);
+    saveToStorage("treasuretrove_admin_campaigns", updated);
   };
 
   const resetDemoData = () => {
-    localStorage.removeItem("lumera_admin_products");
-    localStorage.removeItem("lumera_admin_orders");
-    localStorage.removeItem("lumera_admin_coupons");
-    localStorage.removeItem("lumera_admin_campaigns");
+    localStorage.removeItem("treasuretrove_admin_products");
+    localStorage.removeItem("treasuretrove_admin_orders");
+    localStorage.removeItem("treasuretrove_admin_coupons");
+    localStorage.removeItem("treasuretrove_admin_campaigns");
     
     setProducts(INITIAL_PRODUCTS);
     setOrders(MOCK_ORDERS);

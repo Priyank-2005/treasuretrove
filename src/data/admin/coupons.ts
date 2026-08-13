@@ -28,7 +28,7 @@ export const MOCK_COUPONS: Coupon[] = [
   },
   {
     id: "COUP-002",
-    code: "LUMERA20",
+    code: "TREASURE20",
     discountType: "Percentage",
     discountValue: 20,
     minOrderValue: 2999,

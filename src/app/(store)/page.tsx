@@ -100,9 +100,9 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex flex-col items-center mb-12 text-center">
             <h2 className="font-serif text-3xl mb-4">Follow the Glow</h2>
-            <a href="https://instagram.com/lumera.jewels" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-brand-gold hover:text-brand-charcoal transition-colors">
+            <a href="https://instagram.com/treasure.trove" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-brand-gold hover:text-brand-charcoal transition-colors">
               <InstagramIcon className="w-5 h-5" />
-              <span className="font-medium tracking-widest uppercase">@lumera.jewels</span>
+              <span className="font-medium tracking-widest uppercase">@treasure.trove</span>
             </a>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -31,7 +31,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
-    const savedCart = localStorage.getItem("lumera_cart");
+    const savedCart = localStorage.getItem("treasuretrove_cart");
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
@@ -43,7 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem("lumera_cart", JSON.stringify(items));
+      localStorage.setItem("treasuretrove_cart", JSON.stringify(items));
     }
   }, [items, isMounted]);
 

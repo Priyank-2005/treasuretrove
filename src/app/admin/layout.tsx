@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "LUMÉRA Admin",
+  title: "Treasure Trove Admin",
   description: "Store Management Dashboard",
 };
 

@@ -30,11 +30,11 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
-              <input type="text" defaultValue="LUMÉRA" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-charcoal focus:border-brand-charcoal" />
+              <input type="text" defaultValue="Treasure Trove" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-charcoal focus:border-brand-charcoal" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-              <input type="email" defaultValue="contact@lumera.demo" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-charcoal focus:border-brand-charcoal" />
+              <input type="email" defaultValue="contact@treasuretrove.demo" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-charcoal focus:border-brand-charcoal" />
             </div>
           </div>
           <div>

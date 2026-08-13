@@ -23,7 +23,7 @@ export default function CarePage() {
           <div>
             <h3 className="font-serif text-2xl font-medium mb-4">Storage</h3>
             <p className="text-gray-600 leading-relaxed">
-              When not wearing your jewelry, store it in the original LUMÉRA pouch or a jewelry box. Keep pieces separate to avoid scratching, and store them in a cool, dry place away from direct sunlight.
+              When not wearing your jewelry, store it in the original Treasure Trove pouch or a jewelry box. Keep pieces separate to avoid scratching, and store them in a cool, dry place away from direct sunlight.
             </p>
           </div>
           <div>

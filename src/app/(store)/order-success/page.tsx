@@ -20,7 +20,7 @@ export default function OrderSuccessPage() {
         </h1>
         
         <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-          Thank you for shopping with LUMÉRA. Your beautiful new pieces are being prepared for shipment.
+          Thank you for shopping with Treasure Trove. Your beautiful new pieces are being prepared for shipment.
         </p>
 
         <div className="bg-white p-6 mb-10 text-left border border-gray-200">

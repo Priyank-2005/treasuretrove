@@ -20,7 +20,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
-    const savedWishlist = localStorage.getItem("lumera_wishlist");
+    const savedWishlist = localStorage.getItem("treasuretrove_wishlist");
     if (savedWishlist) {
       try {
         setItems(JSON.parse(savedWishlist));
@@ -32,7 +32,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem("lumera_wishlist", JSON.stringify(items));
+      localStorage.setItem("treasuretrove_wishlist", JSON.stringify(items));
     }
   }, [items, isMounted]);
 
