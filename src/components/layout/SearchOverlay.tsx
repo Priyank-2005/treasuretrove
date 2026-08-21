@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { PRODUCTS, Product } from "@/data/products";
+import { Product } from "@/data/products";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -18,14 +18,24 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   useEffect(() => {
     if (query.length > 2) {
-      const q = query.toLowerCase();
-      const filtered = PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.features.some((f) => f.toLowerCase().includes(q))
-      );
-      setResults(filtered.slice(0, 4)); // Show top 4
+      const controller = new AbortController();
+      const fetchResults = async () => {
+        try {
+          const res = await fetch(`/api/products?search=${encodeURIComponent(query)}`, {
+            signal: controller.signal,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setResults(data.slice(0, 4));
+          }
+        } catch (error: any) {
+          if (error.name !== 'AbortError') {
+            console.error('Search error:', error);
+          }
+        }
+      };
+      fetchResults();
+      return () => controller.abort();
     } else {
       setResults([]);
     }

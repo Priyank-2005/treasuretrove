@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { PRODUCTS } from "@/data/products";
+import { Product } from "@/data/products";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { ProductGrid } from "@/components/ui/ProductGrid";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ProductFilters } from "@/components/shop/ProductFilters";
 import { SortDropdown, SortOption } from "@/components/shop/SortDropdown";
+import { Loader2 } from "lucide-react";
 
 function ShopContent({ initialCategory }: { initialCategory?: string }) {
   const searchParams = useSearchParams();
   const initialFilter = searchParams.get("filter");
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialCategory ? [initialCategory] : []
@@ -23,6 +27,26 @@ function ShopContent({ initialCategory }: { initialCategory?: string }) {
   
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleCategoryToggle = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -41,7 +65,7 @@ function ShopContent({ initialCategory }: { initialCategory?: string }) {
   };
 
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...products];
 
     if (selectedCategories.length > 0) {
       result = result.filter((p) => selectedCategories.includes(p.category.toLowerCase()));
@@ -76,7 +100,16 @@ function ShopContent({ initialCategory }: { initialCategory?: string }) {
     }
 
     return result;
-  }, [selectedCategories, selectedFeatures, sortBy]);
+  }, [products, selectedCategories, selectedFeatures, sortBy]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 md:px-8 py-24 text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold-mid mx-auto" />
+        <p className="text-gray-500 mt-4">Loading products...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 md:px-8 py-12">

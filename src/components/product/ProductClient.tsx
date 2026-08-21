@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Product, PRODUCTS } from "@/data/products";
+import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
@@ -13,17 +13,13 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Heart, Star, CheckCircle2 } from "lucide-react";
 import { POLICIES } from "@/data/categories";
 
-export function ProductClient({ product }: { product: Product }) {
+export function ProductClient({ product, relatedProducts = [] }: { product: Product; relatedProducts?: Product[] }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const isWishlisted = isInWishlist(product.id);
-
-  const relatedProducts = PRODUCTS.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, 4);
 
   const accordionItems = [
     {
