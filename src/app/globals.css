@@ -1,48 +1,100 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-ivory: #fcfbf9;
-  --color-brand-champagne: #f5eee6;
-  --color-brand-charcoal: #2d2d2d;
-  --color-brand-gold: #d4af37;
-  --color-brand-gold-light: #f1e5c3;
-  --color-brand-sand: #eaddcf;
+  --color-base-dark: #7A5833; /* Aesthetic Warm Light Brown / Caramel */
+  --color-base-light: #F0E3CB; /* Warm Champagne Beige */
+  --color-gold-mid: #D4AF37; /* True metallic gold */
+  --color-gold-highlight: #F3E5AB; /* Very bright gold highlight */
   
-  --font-serif: var(--font-cormorant), serif;
+  --color-text-dark: #FFFFFF;
+  --color-text-dark-muted: #F0E3CB;
+  --color-text-light: #52391E; /* Darker brown for text on light backgrounds */
+  --color-text-light-muted: #8C6A28; /* Rich gold for muted text */
+  
+  --font-serif: var(--font-cormorant), "Times New Roman", serif;
   --font-sans: var(--font-inter), sans-serif;
   
-  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 10px 40px -10px rgba(212, 175, 55, 0.15);
+  --shadow-hover: 0 20px 40px -10px rgba(212, 175, 55, 0.3);
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: var(--color-base-light);
   }
   body {
-    background-color: var(--color-brand-ivory);
-    color: var(--color-brand-charcoal);
+    background-color: var(--color-base-light);
+    color: var(--color-text-light);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  
+  /* Custom Focus Outline */
+  *:focus-visible {
+    outline: 1px solid var(--color-gold-accent);
+    outline-offset: 2px;
   }
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-[#2d2d2d] text-white px-8 py-3 rounded-none hover:bg-black transition-colors uppercase tracking-widest text-sm font-medium;
+  .btn-pill {
+    @apply relative inline-flex items-center justify-center border-none text-[#F7EFE4] px-10 py-3 overflow-hidden transition-all duration-500 ease-out hover:shadow-hover hover:-translate-y-0.5 font-sans text-xs tracking-[0.25em] uppercase shadow-md;
+    background: linear-gradient(135deg, var(--color-gold-highlight) 0%, var(--color-gold-mid) 40%, var(--color-base-dark) 100%);
+    background-size: 200% auto;
   }
   
-  .btn-secondary {
-    @apply bg-transparent border border-[#2d2d2d] text-[#2d2d2d] px-8 py-3 rounded-none hover:bg-[#2d2d2d] hover:text-white transition-colors uppercase tracking-widest text-sm font-medium;
+  .btn-pill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.75s ease;
+  }
+  
+  .btn-pill:hover::after {
+    left: 200%;
+  }
+  
+  .btn-pill-light {
+    @apply inline-flex items-center justify-center border border-gold-mid bg-[#F7EFE4] text-base-dark px-10 py-3 transition-all duration-500 ease-out hover:text-[#F7EFE4] hover:border-transparent font-sans text-xs tracking-[0.25em] uppercase shadow-sm;
+  }
+  .btn-pill-light:hover {
+    background: linear-gradient(135deg, var(--color-gold-highlight) 0%, var(--color-gold-mid) 40%, var(--color-base-dark) 100%);
+    background-size: 200% auto;
   }
 
-  .nav-link {
-    @apply text-sm uppercase tracking-widest text-[#2d2d2d] hover:text-[#d4af37] transition-colors;
+  .eyebrow {
+    @apply text-[10px] tracking-[0.3em] uppercase text-text-light-muted font-medium;
   }
 }
 
-/* Hide scrollbar for clean horizontal scrolls */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Custom Golden Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
 }
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+::-webkit-scrollbar-track {
+  background: var(--color-base-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-accent);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-deep);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+  display: flex;
+  white-space: nowrap;
 }

@@ -32,10 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${cormorant.variable} ${inter.variable} font-sans bg-brand-ivory text-brand-charcoal antialiased flex flex-col min-h-screen`}
+        className={`${cormorant.variable} ${inter.variable} font-sans bg-[var(--color-base-light)] text-[var(--color-text-light)] antialiased flex flex-col min-h-screen`}
       >
         <Providers>
-          <AnnouncementBar />
           <Navbar />
           <main className="flex-1 flex flex-col">
             {children}
