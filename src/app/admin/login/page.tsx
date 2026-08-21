@@ -1,9 +1,51 @@
-import { AdminProvider } from "@/context/AdminContext";
-import { ToastProvider } from "@/context/ToastContext";
-import { Building2 } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ToastProvider, useToast } from "@/context/ToastContext";
+import { Building2, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
+  const [email, setEmail] = useState("admin@treasuretrove.com");
+  const [password, setPassword] = useState("adminpassword");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { showToast } = useToast();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.user.role === "ADMIN") {
+          showToast("Welcome back, Admin!");
+          router.push("/admin");
+        } else {
+          // If a customer tries to log in from admin panel
+          showToast("Access denied. Admin privileges required.");
+          // Optionally log them out since the cookie was set, or leave it. 
+          // They will be blocked by middleware anyway.
+        }
+      } else {
+        showToast(data.error || "Invalid credentials");
+      }
+    } catch (err) {
+      showToast("An error occurred during login.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -22,7 +64,7 @@ export default function AdminLoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm border border-gray-200 sm:rounded-lg sm:px-10">
-          <form className="space-y-6" action="/admin">
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                 Email address
@@ -33,7 +75,8 @@ export default function AdminLoginPage() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  defaultValue="admin@treasuretrove.demo"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-900 sm:text-sm sm:leading-6 px-3"
                 />
@@ -50,7 +93,8 @@ export default function AdminLoginPage() {
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  defaultValue="demo123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-900 sm:text-sm sm:leading-6 px-3"
                 />
@@ -78,22 +122,29 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <Link href="/admin">
-                <button
-                  type="button"
-                  className="flex w-full justify-center rounded-md bg-brand-charcoal px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 mt-2"
-                >
-                  Sign in
-                </button>
-              </Link>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full justify-center rounded-md bg-brand-charcoal px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 mt-2 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign in"}
+              </button>
             </div>
           </form>
 
           <div className="mt-6 text-center text-xs text-gray-500">
-            Demo credentials are pre-filled. This is a prototype login.
+            Demo credentials are pre-filled. You must have an Admin account.
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <ToastProvider>
+      <AdminLoginForm />
+    </ToastProvider>
   );
 }

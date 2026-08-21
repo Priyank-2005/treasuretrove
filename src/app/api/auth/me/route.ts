@@ -18,6 +18,7 @@ export async function GET() {
         name: session.name,
         email: session.email,
         phone: session.phone,
+        role: session.role,
         joinedDate: session.joinedDate,
       },
     });

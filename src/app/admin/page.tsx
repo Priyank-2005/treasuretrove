@@ -1,6 +1,7 @@
 "use client";
 
 import { useAdmin } from "@/context/AdminContext";
+import { useState, useEffect } from "react";
 import { StatCard } from "@/components/admin/StatCard";
 import { SalesChart } from "@/components/admin/SalesChart";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -9,15 +10,25 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function AdminDashboard() {
-  const { products, orders, customers } = useAdmin();
+  const { products, customers } = useAdmin();
+  const [dbOrders, setDbOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/orders')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setDbOrders(data.orders || []);
+      })
+      .catch(err => console.error("Failed to load orders for dashboard"));
+  }, []);
 
   // Basic stats calculations
-  const totalRevenue = orders.reduce((sum, order) => sum + (order.status !== "Cancelled" && order.status !== "Refunded" ? order.total : 0), 0);
-  const totalOrders = orders.length;
+  const totalRevenue = dbOrders.reduce((sum, order) => sum + (order.status !== "CANCELLED" && order.status !== "REFUNDED" ? order.total : 0), 0);
+  const totalOrders = dbOrders.length;
   const totalCustomers = customers.length;
   const totalProducts = products.length;
 
-  const recentOrders = [...orders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+  const recentOrders = [...dbOrders].slice(0, 5);
   
   // Dummy best sellers logic (in reality, calculate from orders)
   const bestSellers = products.filter(p => p.isBestSeller).slice(0, 5);
@@ -123,16 +134,19 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-brand-charcoal">
-                      <Link href={`/admin/orders/${order.id}`} className="hover:underline">{order.id}</Link>
-                    </td>
-                    <td className="px-6 py-4">{order.customerName}</td>
-                    <td className="px-6 py-4"><StatusBadge status={order.status} /></td>
-                    <td className="px-6 py-4 text-right font-medium">₹{order.total.toLocaleString('en-IN')}</td>
-                  </tr>
-                ))}
+                {recentOrders.map((order) => {
+                  const fulfillmentStatus = order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase();
+                  return (
+                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-brand-charcoal">
+                        <Link href={`/admin/orders/${order.id}`} className="hover:underline">{order.orderNumber}</Link>
+                      </td>
+                      <td className="px-6 py-4">{order.customerName}</td>
+                      <td className="px-6 py-4"><StatusBadge status={fulfillmentStatus as any} /></td>
+                      <td className="px-6 py-4 text-right font-medium">₹{order.total.toLocaleString('en-IN')}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -164,7 +178,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <div className="text-sm font-medium text-gray-900">₹{product.price.toLocaleString('en-IN')}</div>
-                    <div className="text-xs text-green-600 mt-1 font-medium">{Math.floor(Math.random() * 100) + 50} sold</div>
+                    <div className="text-xs text-green-600 mt-1 font-medium">{Math.floor(product.price % 100) + 50} sold</div>
                   </div>
                 </li>
               ))}

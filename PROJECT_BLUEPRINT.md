@@ -242,6 +242,11 @@ Phase 12: Production preparation (NOT deployment)
 | 2024-08-22 | 1 | Built 6 customer pages + AuthContext + Navbar auth | Full customer frontend complete |
 | 2024-08-22 | 2 | PostgreSQL setup, Prisma schema, migration, seed script | Database initialized with mock data |
 | 2024-08-22 | 3 | Created 8 DAL modules + barrel export | Data access layer complete |
+| 2026-08-21 | 4 | Integrated real DB calls to Products API, Storefront pages | Product catalog connected to DB |
+| 2026-08-21 | 5 | Updated Inventory logic and Cart API | Atomic checkout stock check ready |
+| 2026-08-21 | 6 | Implemented Cart & Checkout with DB order creation | Order generation complete |
+| 2026-08-21 | 7 | Integrated Razorpay test mode | Online payments active |
+| 2026-08-22 | 8 | Refactored orders frontend and backend, created invoice view | Orders syncing with DB + Invoice |
 
 ## 16. Implementation Status
 
@@ -271,15 +276,16 @@ Phase 12: Production preparation (NOT deployment)
 - [x] Prisma schema + migrations
 - [x] Seed data
 - [x] Data access layer
-- [ ] Authentication (server-side)
-- [ ] Products API
-- [ ] Inventory management
-- [ ] Cart validation API
-- [ ] Coupon validation API
-- [ ] Order creation API
-- [ ] Razorpay integration
-- [ ] Webhook handlers
-- [ ] Admin APIs
+- [x] Authentication (server-side)
+- [x] Products API
+- [x] Inventory management
+- [x] Cart validation API
+- [x] Coupon validation API
+- [x] Order creation API
+- [x] Razorpay integration
+- [x] Webhook handlers
+- [x] Admin APIs (Orders)
+- [ ] Admin APIs (Products/Customers)
 - [ ] Bulk import API
 
 ### Testing
