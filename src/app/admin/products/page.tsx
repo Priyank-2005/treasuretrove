@@ -1,15 +1,32 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useAdmin } from "@/context/AdminContext";
-import { Product } from "@/data/products";
-import { Search, Plus, Upload, MoreHorizontal, ChevronLeft, ChevronRight, Edit2, Trash2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Plus, Upload, MoreHorizontal, ChevronLeft, ChevronRight, Edit2, Trash2, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function ProductsPage() {
-  const { products, bulkDeleteProducts, bulkUpdateProducts, updateProduct, deleteProduct } = useAdmin();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = () => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else if (data.products) {
+          setProducts(data.products);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
   
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -50,55 +67,94 @@ export default function ProductsPage() {
     }
   };
 
-  const handleBulkAction = (action: string) => {
+  const updateProductAPI = async (id: string, data: any) => {
+    await fetch(`/api/admin/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    fetchProducts();
+  };
+
+  const deleteProductAPI = async (id: string) => {
+    await fetch(`/api/admin/products/${id}`, {
+      method: 'DELETE'
+    });
+    fetchProducts();
+  };
+
+  const handleBulkAction = async (action: string) => {
     if (selectedIds.length === 0) return;
     
     switch (action) {
       case "delete":
         if (confirm(`Are you sure you want to delete ${selectedIds.length} products?`)) {
-          bulkDeleteProducts(selectedIds);
+          for (const id of selectedIds) {
+            await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+          }
           setSelectedIds([]);
+          fetchProducts();
         }
         break;
       case "activate":
       case "deactivate":
-        // Simulated status update - our Product type doesn't have a status field yet but we can pretend
-        // For the sake of prototype, we just alert
         alert(`${selectedIds.length} products ${action}d successfully (Simulated)`);
         setSelectedIds([]);
         break;
       case "update_price":
         const newPrice = prompt("Enter new price for selected products:");
         if (newPrice && !isNaN(Number(newPrice))) {
-          bulkUpdateProducts(selectedIds, { price: Number(newPrice) });
+          for (const id of selectedIds) {
+            await fetch(`/api/admin/products/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ price: Number(newPrice) })
+            });
+          }
           setSelectedIds([]);
+          fetchProducts();
         }
         break;
       case "update_stock":
         const newStock = prompt("Enter new stock for selected products:");
         if (newStock && !isNaN(Number(newStock))) {
-          bulkUpdateProducts(selectedIds, { stock: Number(newStock) });
+          for (const id of selectedIds) {
+            await fetch(`/api/admin/products/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ stock: Number(newStock) })
+            });
+          }
           setSelectedIds([]);
+          fetchProducts();
         }
         break;
     }
   };
 
-  const saveInlineEdit = (product: Product) => {
+  const saveInlineEdit = (product: any) => {
     if (editField === "price") {
-      updateProduct({ ...product, price: Number(editValue) });
+      updateProductAPI(product.id, { ...product, price: Number(editValue) });
     } else if (editField === "stock") {
-      updateProduct({ ...product, stock: Number(editValue) });
+      updateProductAPI(product.id, { ...product, stock: Number(editValue) });
     }
     setEditingId(null);
     setEditField(null);
   };
 
-  const startInlineEdit = (product: Product, field: "price" | "stock") => {
+  const startInlineEdit = (product: any, field: "price" | "stock") => {
     setEditingId(product.id);
     setEditField(field);
     setEditValue(product[field].toString());
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-charcoal" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -249,7 +305,7 @@ export default function ProductsPage() {
                       </Link>
                       <button 
                         onClick={() => {
-                          if (confirm(`Delete ${product.name}?`)) deleteProduct(product.id);
+                          if (confirm(`Delete ${product.name}?`)) deleteProductAPI(product.id);
                         }}
                         className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                       >

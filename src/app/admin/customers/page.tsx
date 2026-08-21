@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { useAdmin } from "@/context/AdminContext";
-import { Search, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ChevronRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function CustomersPage() {
-  const { customers } = useAdmin();
+  const [customers, setCustomers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/customers')
+      .then(res => res.json())
+      .then(data => {
+        if (data.customers) setCustomers(data.customers);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(search.toLowerCase()) || 
     c.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-charcoal" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">

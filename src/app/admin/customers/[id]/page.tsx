@@ -1,22 +1,45 @@
 "use client";
 
-import { useAdmin } from "@/context/AdminContext";
+import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Mail, Phone, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Mail, Phone, ShoppingBag, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { use } from "react";
 
 export default function CustomerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const { customers, orders } = useAdmin();
-  
-  const customer = customers.find(c => c.id === resolvedParams.id);
+  const [customer, setCustomer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!customer) {
+  useEffect(() => {
+    fetch(`/api/admin/customers/${resolvedParams.id}`)
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(data => {
+        if (data.customer) setCustomer(data.customer);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, [resolvedParams.id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-charcoal" />
+      </div>
+    );
+  }
+
+  if (error || !customer) {
     notFound();
   }
 
-  const customerOrders = orders.filter(o => o.customerId === customer.id);
+  const customerOrders = customer.orderHistory || [];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -89,11 +112,11 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {customerOrders.map((order) => (
+                {customerOrders.map((order: any) => (
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-brand-charcoal">
                       <Link href={`/admin/orders/${order.id}`} className="hover:underline">
-                        {order.id}
+                        #{order.orderNumber}
                       </Link>
                     </td>
                     <td className="px-6 py-4 text-gray-500">
