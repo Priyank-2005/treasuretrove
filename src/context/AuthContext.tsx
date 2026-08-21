@@ -26,235 +26,193 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_USER = {
-  id: "CUST-001",
-  name: "Ayushi Sainani",
-  email: "ayushi@example.com",
-  phone: "+91 9876543210",
-  joinedDate: "2023-01-15",
-  password: "demo123"
-};
-
-const AUTH_KEY = "treasuretrove_auth";
-const USERS_KEY = "treasuretrove_users";
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
   const { showToast } = useToast();
 
   // Temporary state for registration/reset before OTP
-  const [pendingUser, setPendingUser] = useState<any>(null);
+  const [pendingRegistration, setPendingRegistration] = useState<any>(null);
   const [resetEmail, setResetEmail] = useState<string | null>(null);
 
+  // On mount, check for an existing server session
   useEffect(() => {
-    setIsMounted(true);
-    try {
-      const storedAuth = localStorage.getItem(AUTH_KEY);
-      if (storedAuth) {
-        setUser(JSON.parse(storedAuth));
-      }
-      
-      const storedUsers = localStorage.getItem(USERS_KEY);
-      if (!storedUsers) {
-        localStorage.setItem(USERS_KEY, JSON.stringify([DEMO_USER]));
-      } else {
-        // Ensure the demo user is always present and up-to-date
-        const users = JSON.parse(storedUsers);
-        const demoIndex = users.findIndex((u: any) => u.id === DEMO_USER.id);
-        if (demoIndex === -1) {
-          users.push(DEMO_USER);
-        } else {
-          users[demoIndex] = { ...users[demoIndex], ...DEMO_USER };
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
         }
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      } catch (error) {
+        console.error("Failed to check session:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to load auth from localStorage", error);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+
+    checkSession();
   }, []);
 
-  useEffect(() => {
-    if (isMounted) {
-      if (user) {
-        localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-      } else {
-        localStorage.removeItem(AUTH_KEY);
-      }
-    }
-  }, [user, isMounted]);
-
-  const getUsers = () => {
-    if (typeof window === "undefined") return [DEMO_USER];
-    try {
-      const users = localStorage.getItem(USERS_KEY);
-      return users ? JSON.parse(users) : [DEMO_USER];
-    } catch {
-      return [DEMO_USER];
-    }
-  };
-
-  const saveUsers = (users: any[]) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-  };
-
   const login = async (email: string, password: string) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-      setTimeout(() => {
-        const users = getUsers();
-        const foundUser = users.find((u: any) => u.email === email && u.password === password);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-        if (foundUser) {
-          const authUser = {
-            id: foundUser.id,
-            name: foundUser.name,
-            email: foundUser.email,
-            phone: foundUser.phone,
-            joinedDate: foundUser.joinedDate,
-          };
-          setUser(authUser);
-          showToast("Logged in successfully");
-          resolve({ success: true });
-        } else {
-          resolve({ success: false, error: "Invalid email or password" });
-        }
-      }, 500);
-    });
+      const data = await res.json();
+
+      if (data.success) {
+        setUser(data.user);
+        showToast("Logged in successfully");
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Login failed' };
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
   };
 
   const register = async (data: { name: string; email: string; phone: string; password: string }) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-      setTimeout(() => {
-        const users = getUsers();
-        if (users.some((u: any) => u.email === data.email)) {
-          resolve({ success: false, error: "Email already registered" });
-          return;
-        }
-        
-        setPendingUser({
-          ...data,
-          id: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
-          joinedDate: new Date().toISOString().split("T")[0]
-        });
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setPendingRegistration(result.pendingData);
         showToast("OTP sent to your email");
-        resolve({ success: true });
-      }, 500);
-    });
+        return { success: true };
+      } else {
+        return { success: false, error: result.error || 'Registration failed' };
+      }
+    } catch (error) {
+      console.error("Register error:", error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
   };
 
   const verifyOtp = async (otp: string) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-      setTimeout(() => {
-        if (otp.length === 6) {
-          if (pendingUser) {
-            const users = getUsers();
-            users.push(pendingUser);
-            saveUsers(users);
-            
-            const authUser = {
-              id: pendingUser.id,
-              name: pendingUser.name,
-              email: pendingUser.email,
-              phone: pendingUser.phone,
-              joinedDate: pendingUser.joinedDate,
-            };
-            setUser(authUser);
-            setPendingUser(null);
-            showToast("Registration successful");
-            resolve({ success: true });
-          } else {
-            resolve({ success: true });
-          }
-        } else {
-          resolve({ success: false, error: "Invalid OTP. Must be 6 digits." });
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          otp,
+          pendingData: pendingRegistration,
+          purpose: pendingRegistration ? 'register' : 'reset',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        if (data.user) {
+          setUser(data.user);
+          setPendingRegistration(null);
+          showToast("Registration successful");
         }
-      }, 1000);
-    });
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'OTP verification failed' };
+      }
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
   };
 
   const logout = async () => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        setUser(null);
-        showToast("Logged out successfully");
-        resolve();
-      }, 200);
-    });
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+      showToast("Logged out successfully");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Clear locally even if API fails
+      setUser(null);
+    }
   };
 
   const updateProfile = async (data: Partial<AuthUser>) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        if (user) {
-          const updatedUser = { ...user, ...data };
-          setUser(updatedUser);
-          
-          const users = getUsers();
-          const userIndex = users.findIndex((u: any) => u.id === user.id);
-          if (userIndex !== -1) {
-            users[userIndex] = { ...users[userIndex], ...data };
-            saveUsers(users);
-          }
-          
-          showToast("Profile updated successfully");
-        }
-        resolve();
-      }, 500);
-    });
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (result.success && result.user) {
+        setUser(result.user);
+        showToast("Profile updated successfully");
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+    }
   };
 
   const requestPasswordReset = async (email: string) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-      setTimeout(() => {
-        const users = getUsers();
-        if (users.some((u: any) => u.email === email)) {
-          setResetEmail(email);
-          showToast("Password reset OTP sent");
-          resolve({ success: true });
-        } else {
-          resolve({ success: false, error: "Email not found" });
-        }
-      }, 500);
-    });
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setResetEmail(email);
+        showToast("Password reset OTP sent");
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Failed to send reset OTP' };
+      }
+    } catch (error) {
+      console.error("Password reset request error:", error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
   };
 
   const resetPassword = async (otp: string, newPassword: string) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-      setTimeout(() => {
-        if (otp.length === 6) {
-          if (resetEmail) {
-            const users = getUsers();
-            const userIndex = users.findIndex((u: any) => u.email === resetEmail);
-            if (userIndex !== -1) {
-              users[userIndex].password = newPassword;
-              saveUsers(users);
-              setResetEmail(null);
-              showToast("Password reset successfully");
-              resolve({ success: true });
-            } else {
-              resolve({ success: false, error: "User not found" });
-            }
-          } else {
-            resolve({ success: false, error: "No reset request pending" });
-          }
-        } else {
-          resolve({ success: false, error: "Invalid OTP. Must be 6 digits." });
-        }
-      }, 1000);
-    });
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail, otp, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setResetEmail(null);
+        showToast("Password reset successfully");
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Password reset failed' };
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user: isMounted ? user : null,
-        isAuthenticated: isMounted ? !!user : false,
-        isLoading: isMounted ? isLoading : true,
+        user,
+        isAuthenticated: !!user,
+        isLoading,
         login,
         register,
         verifyOtp,
