@@ -20,14 +20,33 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
-    const savedWishlist = localStorage.getItem("treasuretrove_wishlist");
-    if (savedWishlist) {
+    
+    // First try to load from API (DB)
+    const loadWishlist = async () => {
       try {
-        setItems(JSON.parse(savedWishlist));
+        const res = await fetch('/api/wishlist');
+        if (res.ok) {
+          const data = await res.json();
+          // If we got items from DB, use them and ignore local storage
+          setItems(data.items || []);
+          return;
+        }
       } catch (e) {
-        console.error("Failed to parse wishlist", e);
+        // Fall back to local storage
       }
-    }
+      
+      // Fallback to local storage if API fails or user is not logged in (empty response)
+      const savedWishlist = localStorage.getItem("treasuretrove_wishlist");
+      if (savedWishlist) {
+        try {
+          setItems(JSON.parse(savedWishlist));
+        } catch (e) {
+          console.error("Failed to parse wishlist", e);
+        }
+      }
+    };
+    
+    loadWishlist();
   }, []);
 
   useEffect(() => {
@@ -36,17 +55,37 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isMounted]);
 
-  const toggleWishlist = (product: Product) => {
+  const toggleWishlist = async (product: Product) => {
+    const exists = items.some((item) => item.id === product.id);
+    
+    // Optimistic UI update
     setItems((prev) => {
-      const exists = prev.some((item) => item.id === product.id);
       if (exists) {
-        showToast("Removed from wishlist");
         return prev.filter((item) => item.id !== product.id);
       } else {
-        showToast("Added to wishlist");
         return [...prev, product];
       }
     });
+
+    if (exists) {
+      showToast("Removed from wishlist");
+      try {
+        await fetch('/api/wishlist', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: product.id })
+        });
+      } catch (e) {}
+    } else {
+      showToast("Added to wishlist");
+      try {
+        await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: product.id })
+        });
+      } catch (e) {}
+    }
   };
 
   const isInWishlist = (productId: string) => {

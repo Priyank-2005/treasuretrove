@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/context/ToastContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Pencil, Trash2, X, MapPin } from "lucide-react";
@@ -13,12 +13,30 @@ const INDIAN_STATES = [
 ];
 
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES || []);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const fetchAddresses = async () => {
+    try {
+      const res = await fetch("/api/account/addresses");
+      const data = await res.json();
+      setAddresses(data.addresses || []);
+    } catch (error) {
+      showToast("Failed to load addresses");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,7 +80,7 @@ export default function AddressesPage() {
     setEditingAddress(null);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.phone.length !== 10) {
@@ -74,49 +92,73 @@ export default function AddressesPage() {
       return;
     }
 
-    const newAddress: Address = {
-      id: editingAddress ? editingAddress.id : Math.random().toString(36).substring(2, 9),
-      ...formData
-    };
+    setSubmitting(true);
+    try {
+      const method = editingAddress ? "PUT" : "POST";
+      const url = editingAddress 
+        ? `/api/account/addresses/${editingAddress.id}`
+        : "/api/account/addresses";
 
-    let updatedAddresses = [...addresses];
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    if (newAddress.isDefault) {
-      updatedAddresses = updatedAddresses.map(addr => ({ ...addr, isDefault: false }));
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(editingAddress ? "Address updated" : "Address added");
+        await fetchAddresses();
+        handleCloseModal();
+      } else {
+        showToast(data.error || "Failed to save address");
+      }
+    } catch (error) {
+      showToast("An error occurred");
+    } finally {
+      setSubmitting(false);
     }
-
-    if (editingAddress) {
-      updatedAddresses = updatedAddresses.map(addr => addr.id === editingAddress.id ? newAddress : addr);
-      showToast("Address updated successfully");
-    } else {
-      updatedAddresses.push(newAddress);
-      showToast("Address added successfully");
-    }
-
-    if (updatedAddresses.length > 0 && !updatedAddresses.some(a => a.isDefault)) {
-      updatedAddresses[0].isDefault = true;
-    }
-
-    setAddresses(updatedAddresses);
-    handleCloseModal();
   };
 
-  const handleDelete = (id: string) => {
-    let updatedAddresses = addresses.filter(addr => addr.id !== id);
-    if (updatedAddresses.length > 0 && !updatedAddresses.some(a => a.isDefault)) {
-      updatedAddresses[0].isDefault = true;
+  const handleDelete = async (id: string) => {
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/account/addresses/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("Address deleted");
+        await fetchAddresses();
+      } else {
+        showToast(data.error || "Failed to delete address");
+      }
+    } catch (error) {
+      showToast("An error occurred");
+    } finally {
+      setSubmitting(false);
+      setDeleteConfirmId(null);
     }
-    setAddresses(updatedAddresses);
-    setDeleteConfirmId(null);
-    showToast("Address deleted successfully");
   };
 
-  const handleSetDefault = (id: string) => {
-    setAddresses(addresses.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id
-    })));
-    showToast("Default address updated");
+  const handleSetDefault = async (id: string) => {
+    const addr = addresses.find((a) => a.id === id);
+    if (!addr) return;
+
+    try {
+      const res = await fetch(`/api/account/addresses/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...addr, isDefault: true }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("Default address updated");
+        await fetchAddresses();
+      }
+    } catch (error) {
+      showToast("Failed to update default address");
+    }
   };
 
   return (
@@ -132,7 +174,11 @@ export default function AddressesPage() {
         </button>
       </div>
 
-      {addresses.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-8 h-8 border-4 border-gold-mid border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : addresses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-base-light border border-gold-mid/20">
           <MapPin className="w-12 h-12 text-gold-mid mb-4 opacity-50" />
           <p className="text-lg font-medium text-text-light mb-2">No saved addresses</p>

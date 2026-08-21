@@ -38,9 +38,10 @@ export default function CheckoutPage() {
   // Pre-fill delivery address from user's default address
   useEffect(() => {
     if (isAuthenticated) {
-      fetch('/api/addresses')
+      fetch('/api/account/addresses')
         .then(res => res.json())
-        .then((addresses) => {
+        .then((data) => {
+          const addresses = data.addresses || [];
           if (addresses.length > 0) {
             const defaultAddr = addresses[0]; // sorted by isDefault desc
             setFormData(prev => ({

@@ -45,6 +45,7 @@ export async function PUT(request: NextRequest) {
         name: updatedUser.name,
         email: updatedUser.email,
         phone: updatedUser.phone || '',
+        role: session.role,
         joinedDate: updatedUser.joinedDate.toISOString().split('T')[0],
       },
     });

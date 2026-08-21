@@ -1,46 +1,68 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
-import { CUSTOMER_ORDERS } from '@/data/customer/orders';
-import { MOCK_ADDRESSES } from '@/data/customer/addresses';
 import Link from 'next/link';
-import { ShoppingBag, MapPin, User, Heart, Package, ArrowRight } from 'lucide-react';
+import { ShoppingBag, MapPin, User, Heart, Package, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function AccountPage() {
   const { user } = useAuth();
   const { wishlistCount } = useWishlist();
 
-  // Get recent orders
-  const recentOrders = CUSTOMER_ORDERS.slice(0, 3);
-  const totalOrders = CUSTOMER_ORDERS.length;
-  const totalAddresses = MOCK_ADDRESSES.length;
+  const [orders, setOrders] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/account/orders').then(res => res.json()),
+      fetch('/api/account/addresses').then(res => res.json())
+    ]).then(([ordersData, addressesData]) => {
+      if (ordersData.orders) setOrders(ordersData.orders);
+      if (addressesData.addresses) setAddresses(addressesData.addresses);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const recentOrders = orders.slice(0, 3);
+  const totalOrders = orders.length;
+  const totalAddresses = addresses.length;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Delivered':
-      case 'Paid':
+    switch (status.toUpperCase()) {
+      case 'DELIVERED':
+      case 'PAID':
         return <span className="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">{status}</span>;
-      case 'Processing':
-      case 'Shipped':
+      case 'PROCESSING':
+      case 'SHIPPED':
         return <span className="px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">{status}</span>;
-      case 'Pending':
+      case 'PENDING':
+      case 'CONFIRMED':
         return <span className="px-2.5 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">{status}</span>;
-      case 'Cancelled':
-      case 'Refunded':
+      case 'CANCELLED':
+      case 'REFUNDED':
         return <span className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">{status}</span>;
       default:
         return <span className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">{status}</span>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-charcoal" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10">
@@ -102,7 +124,7 @@ export default function AccountPage() {
               <div key={order.id} className="bg-base-light border border-gold-mid/20 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-3">
-                    <span className="font-medium text-base-dark">#{order.id}</span>
+                    <span className="font-medium text-base-dark">#{order.orderNumber}</span>
                     {getStatusBadge(order.status)}
                   </div>
                   <div className="text-sm text-text-light-muted mt-1">
@@ -111,7 +133,7 @@ export default function AccountPage() {
                 </div>
                 <div className="flex items-center justify-between md:flex-col md:items-end gap-2">
                   <div className="font-medium text-base-dark">
-                    ${order.total.toFixed(2)}
+                    ₹{order.total.toLocaleString("en-IN")}
                   </div>
                   <Link href={`/account/orders/${order.id}`} className="text-sm text-gold-mid hover:underline">
                     View Details
@@ -123,45 +145,11 @@ export default function AccountPage() {
         ) : (
           <div className="bg-base-light border border-gold-mid/20 p-8 text-center">
             <p className="text-text-light-muted mb-4">No orders yet</p>
-            <Link href="/" className="btn-pill inline-flex">
+            <Link href="/shop" className="btn-pill inline-flex">
               Start Shopping
             </Link>
           </div>
         )}
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="font-serif text-2xl text-base-dark mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link href="/account/orders" className="bg-base-light border border-gold-mid/20 p-6 flex flex-col items-center justify-center gap-3 hover:shadow-soft transition-all text-center group">
-            <div className="w-12 h-12 bg-gold-mid/10 flex items-center justify-center rounded-full text-gold-mid group-hover:bg-gold-mid group-hover:text-white transition-colors">
-              <ShoppingBag className="w-6 h-6" />
-            </div>
-            <div className="font-medium text-base-dark">My Orders</div>
-          </Link>
-          
-          <Link href="/account/addresses" className="bg-base-light border border-gold-mid/20 p-6 flex flex-col items-center justify-center gap-3 hover:shadow-soft transition-all text-center group">
-            <div className="w-12 h-12 bg-gold-mid/10 flex items-center justify-center rounded-full text-gold-mid group-hover:bg-gold-mid group-hover:text-white transition-colors">
-              <MapPin className="w-6 h-6" />
-            </div>
-            <div className="font-medium text-base-dark">Addresses</div>
-          </Link>
-          
-          <Link href="/account/profile" className="bg-base-light border border-gold-mid/20 p-6 flex flex-col items-center justify-center gap-3 hover:shadow-soft transition-all text-center group">
-            <div className="w-12 h-12 bg-gold-mid/10 flex items-center justify-center rounded-full text-gold-mid group-hover:bg-gold-mid group-hover:text-white transition-colors">
-              <User className="w-6 h-6" />
-            </div>
-            <div className="font-medium text-base-dark">Profile</div>
-          </Link>
-          
-          <Link href="/wishlist" className="bg-base-light border border-gold-mid/20 p-6 flex flex-col items-center justify-center gap-3 hover:shadow-soft transition-all text-center group">
-            <div className="w-12 h-12 bg-gold-mid/10 flex items-center justify-center rounded-full text-gold-mid group-hover:bg-gold-mid group-hover:text-white transition-colors">
-              <Heart className="w-6 h-6" />
-            </div>
-            <div className="font-medium text-base-dark">Wishlist</div>
-          </Link>
-        </div>
       </div>
     </div>
   );
