@@ -5,15 +5,15 @@ export default function Home() {
   return (
     <>
       {/* 1. Premium Hero Banner - Full Bleed Editorial */}
-      <section className="relative w-full h-[90vh] min-h-[600px] mt-16 md:mt-20">
+      <section className="relative w-full h-[90vh] min-h-[600px] mt-16 md:mt-20 bg-base-dark">
         {/* Main hero image */}
         <div 
           className="absolute inset-0 bg-cover bg-[center_top_-5rem]"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=2000')" }}
         ></div>
         
-        {/* Subtle gradient overlay to make text pop while keeping the elegant tone */}
-        <div className="absolute inset-0 bg-base-dark/20 backdrop-blur-[1px]"></div>
+        {/* Stronger gradient overlay to make white text pop against the image */}
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
 
         <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
           <span className="eyebrow text-gold-highlight mb-6 block tracking-[0.4em]">The Signature Collection</span>
