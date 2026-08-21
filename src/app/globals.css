@@ -2,12 +2,12 @@
 
 @theme {
   --color-base-dark: #7A5833; /* Aesthetic Warm Light Brown / Caramel */
-  --color-base-light: #F0E3CB; /* Warm Champagne Beige */
+  --color-base-light: #FDFBF7; /* Pure Ivory (required for logo to blend seamlessly) */
   --color-gold-mid: #D4AF37; /* True metallic gold */
   --color-gold-highlight: #F3E5AB; /* Very bright gold highlight */
   
   --color-text-dark: #FFFFFF;
-  --color-text-dark-muted: #F0E3CB;
+  --color-text-dark-muted: #FDFBF7;
   --color-text-light: #52391E; /* Darker brown for text on light backgrounds */
   --color-text-light-muted: #8C6A28; /* Rich gold for muted text */
   
