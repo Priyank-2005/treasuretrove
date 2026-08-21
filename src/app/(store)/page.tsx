@@ -4,16 +4,34 @@ import Image from "next/image";
 export default function Home() {
   return (
     <>
-      {/* 1. Premium Hero Banner - Full Bleed Editorial */}
-      <section className="relative w-full h-[90vh] min-h-[600px] mt-16 md:mt-20 bg-base-dark">
-        {/* Main hero image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-[center_top_-5rem]"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=2000')" }}
-        ></div>
+      {/* 1. Premium Hero Banner - Moving Marquee Background */}
+      <section className="relative w-full h-[90vh] min-h-[600px] mt-16 md:mt-20 bg-base-dark overflow-hidden">
         
-        {/* Stronger gradient overlay to make white text pop against the image */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+        {/* Moving Background Marquee */}
+        <div className="absolute inset-0 flex h-full min-w-max animate-marquee opacity-80 pointer-events-none">
+          {[
+            "https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=1200",
+            "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=1200",
+            "https://images.unsplash.com/photo-1605100804763-247f6612d540?q=80&w=1200",
+            "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1200",
+            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200",
+            /* Duplicated to create a seamless infinite loop */
+            "https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=1200",
+            "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=1200",
+            "https://images.unsplash.com/photo-1605100804763-247f6612d540?q=80&w=1200",
+            "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1200",
+            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200"
+          ].map((img, i) => (
+            <div 
+              key={i} 
+              className="h-full w-[80vw] md:w-[40vw] bg-cover bg-center shrink-0 border-r border-base-dark/20" 
+              style={{ backgroundImage: `url('${img}')` }}
+            ></div>
+          ))}
+        </div>
+        
+        {/* Stronger gradient overlay to make white text pop against the moving images */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
 
         <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
           <span className="eyebrow text-gold-highlight mb-6 block tracking-[0.4em]">The Signature Collection</span>
