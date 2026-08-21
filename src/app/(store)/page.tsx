@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <>
       {/* 1. Premium Hero Banner */}
-      <section className="relative w-full max-w-[1800px] mx-auto md:mt-12 md:px-6 mb-10">
+      <section className="relative w-full max-w-[1800px] mx-auto mt-16 md:mt-24 md:px-6 mb-10">
         <div className="relative h-[70vh] md:h-[80vh] w-full md:rounded-2xl overflow-hidden shadow-sm flex items-center justify-center">
           
           {/* Main hero image */}
@@ -36,17 +36,17 @@ export default function Home() {
       {/* 2. Value Props / Trust Strip */}
       <section className="bg-base-light py-10 border-b border-gold-mid/30">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-10 md:gap-24 text-center">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24 text-center">
             <div className="flex flex-col items-center gap-3">
               <svg className="w-6 h-6 text-gold-mid" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
               <span className="font-sans text-xs tracking-widest uppercase text-base-dark">Tarnish Free</span>
             </div>
-            <div className="hidden md:block w-px h-10 bg-gold-mid/30"></div>
+            <div className="w-16 h-px md:w-px md:h-10 bg-gold-mid/30"></div>
             <div className="flex flex-col items-center gap-3">
               <svg className="w-6 h-6 text-gold-mid" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
               <span className="font-sans text-xs tracking-widest uppercase text-base-dark">Hypoallergenic</span>
             </div>
-            <div className="hidden md:block w-px h-10 bg-gold-mid/30"></div>
+            <div className="w-16 h-px md:w-px md:h-10 bg-gold-mid/30"></div>
             <div className="flex flex-col items-center gap-3">
               <svg className="w-6 h-6 text-gold-mid" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
               <span className="font-sans text-xs tracking-widest uppercase text-base-dark">Water Resistant</span>
@@ -141,6 +141,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 4.5 Moving Reels / The Daily Stack */}
+      <section className="py-20 overflow-hidden bg-base-light">
+        <div className="container mx-auto px-6 mb-12 text-center md:text-left flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <h2 className="font-serif text-3xl md:text-4xl text-base-dark tracking-wide font-light mb-2">In Motion</h2>
+            <p className="font-sans text-sm text-text-light-muted">
+              Tag @treasuretrove to be featured on our feed.
+            </p>
+          </div>
+          <Link href="#" className="text-xs uppercase tracking-[0.25em] text-text-light-muted hover:text-base-dark transition-colors border-b border-transparent hover:border-base-dark pb-1">
+            Follow Us
+          </Link>
+        </div>
+
+        {/* Infinite Marquee Container */}
+        <div className="relative flex overflow-x-hidden w-full group">
+          <div className="flex animate-marquee whitespace-nowrap gap-4 md:gap-6 px-2 w-[200%] md:w-max">
+            {[
+              "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1605100804763-247f6612d540?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1599643478524-fb66f7ca066b?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1605100804763-247f6612d540?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=400&h=700&fit=crop",
+              "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=400&h=700&fit=crop",
+            ].map((img, i) => (
+              <div key={i} className="relative w-48 md:w-72 aspect-[9/16] rounded-xl overflow-hidden shrink-0 cursor-pointer shadow-soft group/reel">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center group-hover/reel:scale-105 transition-transform duration-700"
+                  style={{ backgroundImage: `url('${img}')` }}
+                ></div>
+                {/* Play icon overlay */}
+                <div className="absolute top-4 right-4 bg-black/20 backdrop-blur-sm rounded-full p-2">
+                  <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
+                  <span className="text-white font-sans text-[10px] md:text-xs flex items-center gap-2">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/></svg>
+                    Shop Look
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 5. Brand Story Split */}
       <section className="py-20 bg-gold-metallic text-base-dark">
         <div className="container mx-auto px-6 md:px-12">
@@ -164,28 +214,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Newsletter CTA - Minimal */}
-      <section className="py-28 bg-base-light relative overflow-hidden">
-        <div className="absolute inset-0 border-y border-gold-mid/30 pointer-events-none"></div>
-        <div className="container mx-auto px-6 flex flex-col items-center text-center relative z-10">
-          <h2 className="font-serif text-3xl md:text-4xl text-base-dark mb-4 tracking-wide font-light">Join the Club</h2>
-          <p className="text-text-light-muted font-sans text-sm mb-10 max-w-sm">
-            Sign up for early access to new collections, exclusive events, and 10% off your first order.
-          </p>
-          
-          <form className="w-full max-w-md flex flex-col sm:flex-row gap-4" action="#">
-            <input 
-              type="email" 
-              placeholder="Email address" 
-              className="flex-1 bg-transparent border-b border-base-dark/30 pb-3 text-base-dark placeholder:text-text-light-muted font-sans text-sm focus:outline-none focus:border-gold-mid transition-colors"
-              required
-            />
-            <button type="submit" className="text-xs tracking-[0.25em] uppercase text-base-dark font-medium hover:text-gold-mid transition-colors mt-2 sm:mt-0 whitespace-nowrap border-b border-transparent hover:border-gold-mid pb-3">
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
+
     </>
   );
 }
