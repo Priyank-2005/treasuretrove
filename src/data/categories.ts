@@ -32,7 +32,7 @@ export const CATEGORIES = [
 export const REVIEWS = [
   {
     id: 1,
-    name: "Aarushi M.",
+    name: "Ayushi S.",
     rating: 5,
     text: "I've worn these earrings almost every day and they still look brand new. The quality is unmatched for the price.",
   },

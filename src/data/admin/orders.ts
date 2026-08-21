@@ -31,8 +31,8 @@ export const MOCK_ORDERS: Order[] = [
   {
     id: "LM10284",
     customerId: "CUST-001",
-    customerName: "Aarushi Mehta",
-    customerEmail: "aarushi@example.com",
+    customerName: "Ayushi Sainani",
+    customerEmail: "ayushi@example.com",
     items: [
       { productId: "e1", name: "Aurelia Gold Hoops", quantity: 2, price: 699, image: "/images/products/e1-1.png" },
       { productId: "n3", name: "Mila Heart Necklace", quantity: 1, price: 799, image: "/images/products/n3-1.png" }

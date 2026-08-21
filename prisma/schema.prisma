@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  phone      String?
+  password   String
+  role       Role     @default(CUSTOMER)
+  joinedDate DateTime @default(now())
+  
+  addresses    Address[]
+  orders       Order[]
+  wishlist     WishlistItem[]
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  name      String
+  phone     String
+  address   String
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  
+  products    Product[]
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  categoryId       String
+  price            Int
+  originalPrice    Int?
+  discount         Int?
+  description      String
+  shortDescription String
+  images           String[]
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  badge            String?
+  isNew            Boolean  @default(false)
+  isBestSeller     Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+  stock            Int      @default(0)
+  features         String[]
+  material         String?
+  careInstructions String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category      Category       @relation(fields: [categoryId], references: [id])
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  customerId    String
+  date          DateTime @default(now())
+  total         Int
+  status        String   // "Pending", "Processing", "Shipped", "Delivered", "Cancelled"
+  
+  // Snapshots for historical accuracy
+  customerName  String
+  customerEmail String
+  shippingAddress Json?
+
+  user       User        @relation(fields: [customerId], references: [id])
+  items      OrderItem[]
+  payment    Payment?
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  name      String
+  quantity  Int
+  price     Int
+  image     String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  orderId       String   @unique
+  amount        Int
+  method        String   // "UPI", "Card", "COD"
+  status        String   // "Pending", "Completed", "Failed"
+  transactionId String?
+  createdAt     DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  discount    Int
+  type        String        // "PERCENTAGE", "FLAT"
+  expiry      DateTime?
+  usageLimit  Int?
+  usedCount   Int           @default(0)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  
+  usages      CouponUsage[]
+}
+
+model CouponUsage {
+  id        String   @id @default(cuid())
+  couponId  String
+  orderId   String   @unique
+  usedAt    DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String
+  title     String
+  subtitle  String?
+  image     String
+  link      String
+  isActive  Boolean  @default(true)
+  startDate DateTime?
+  endDate   DateTime?
+}

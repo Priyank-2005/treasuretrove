@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X, User } from "lucide-react";
 import { BRAND } from "@/config/brand";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { SearchOverlay } from "./SearchOverlay";
 import { AnimatePresence, motion } from "framer-motion";
@@ -25,6 +26,7 @@ export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { cartCount, setIsDrawerOpen } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   
   const isHomePage = pathname === "/";
@@ -95,6 +97,18 @@ export function Navbar() {
             >
               <Search className="w-5 h-5" />
             </button>
+            <Link
+              href={isAuthenticated ? "/account" : "/login"}
+              className="hidden md:flex relative transition-opacity hover:opacity-70"
+            >
+              {isAuthenticated && user ? (
+                <span className="w-5 h-5 rounded-full bg-gold-mid text-white text-[10px] font-bold flex items-center justify-center font-sans">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <User className="w-5 h-5" />
+              )}
+            </Link>
             <Link
               href="/wishlist"
               className="hidden md:flex relative transition-opacity hover:opacity-70"

@@ -10,7 +10,7 @@ export interface Customer {
 }
 
 export const MOCK_CUSTOMERS: Customer[] = [
-  { id: "CUST-001", name: "Aarushi Mehta", email: "aarushi@example.com", phone: "+91 9876543210", orders: 12, totalSpent: 14280, joinedDate: "2023-01-15", lastOrder: "2024-08-12" },
+  { id: "CUST-001", name: "Ayushi Sainani", email: "ayushi@example.com", phone: "+91 9876543210", orders: 12, totalSpent: 14280, joinedDate: "2023-01-15", lastOrder: "2024-08-12" },
   { id: "CUST-002", name: "Riya Sharma", email: "riya.sharma@example.com", phone: "+91 9988776655", orders: 4, totalSpent: 4500, joinedDate: "2023-05-20", lastOrder: "2024-08-10" },
   { id: "CUST-003", name: "Nisha Patel", email: "nisha.p@example.com", phone: "+91 9123456789", orders: 1, totalSpent: 699, joinedDate: "2024-08-01", lastOrder: "2024-08-01" },
   { id: "CUST-004", name: "Sneha Reddy", email: "sneha.r@example.com", phone: "+91 9876123450", orders: 8, totalSpent: 9650, joinedDate: "2023-02-10", lastOrder: "2024-07-28" },
