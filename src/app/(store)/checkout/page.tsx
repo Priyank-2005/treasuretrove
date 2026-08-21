@@ -99,6 +99,16 @@ export default function CheckoutPage() {
     setCouponError("");
   };
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
@@ -132,7 +142,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Create order
+      // Create order in DB (status: PENDING)
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -162,16 +172,103 @@ export default function CheckoutPage() {
 
       const orderData = await orderRes.json();
 
-      if (orderData.success) {
+      if (!orderData.success) {
+        setSubmitError(orderData.error || "Failed to place order");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If COD, we are done
+      if (formData.paymentMethod === 'cod') {
         clearCart();
         router.push(`/order-success?order=${orderData.order.orderNumber}`);
-      } else {
-        setSubmitError(orderData.error || "Failed to place order");
+        return;
       }
+
+      // --- Online Payment (Razorpay) Flow ---
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        setSubmitError("Failed to load payment gateway. Please check your connection.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create Razorpay order
+      const rpOrderRes = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.order.id }),
+      });
+
+      const rpOrderData = await rpOrderRes.json();
+
+      if (!rpOrderData.success) {
+        setSubmitError(rpOrderData.error || "Failed to initialize payment");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+        amount: rpOrderData.amount,
+        currency: rpOrderData.currency,
+        name: "Treasure Trove",
+        description: `Order #${rpOrderData.orderNumber}`,
+        order_id: rpOrderData.razorpayOrderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            const verifyRes = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: orderData.order.id,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            
+            if (verifyData.success) {
+              clearCart();
+              router.push(`/order-success?order=${rpOrderData.orderNumber}`);
+            } else {
+              setSubmitError("Payment verification failed. If money was deducted, it will be refunded.");
+            }
+          } catch (err) {
+            setSubmitError("Payment verification failed.");
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: {
+          color: "#2b2b2b",
+        },
+        modal: {
+          ondismiss: function() {
+            setSubmitError("Payment cancelled. You can try again or choose COD.");
+            setIsSubmitting(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        setSubmitError(`Payment failed: ${response.error.description}`);
+        setIsSubmitting(false);
+      });
+      rzp.open();
+
     } catch (error) {
       console.error("Checkout error:", error);
       setSubmitError("Something went wrong. Please try again.");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -247,13 +344,9 @@ export default function CheckoutPage() {
                   <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === "cod"} onChange={handleChange} className="w-4 h-4 accent-brand-charcoal" />
                   <span className="font-medium">Cash on Delivery (COD)</span>
                 </label>
-                <label className="flex items-center gap-3 p-4 border border-gray-300 cursor-not-allowed opacity-50">
-                  <input type="radio" name="paymentMethod" value="upi" disabled className="w-4 h-4 accent-brand-charcoal" />
-                  <span className="font-medium">UPI (Coming Soon)</span>
-                </label>
-                <label className="flex items-center gap-3 p-4 border border-gray-300 cursor-not-allowed opacity-50">
-                  <input type="radio" name="paymentMethod" value="card" disabled className="w-4 h-4 accent-brand-charcoal" />
-                  <span className="font-medium">Credit / Debit Card (Coming Soon)</span>
+                <label className="flex items-center gap-3 p-4 border border-gray-300 cursor-pointer hover:bg-brand-champagne transition-colors">
+                  <input type="radio" name="paymentMethod" value="online" checked={formData.paymentMethod === "online"} onChange={handleChange} className="w-4 h-4 accent-brand-charcoal" />
+                  <span className="font-medium">Pay Online (UPI, Cards, Netbanking)</span>
                 </label>
               </div>
             </section>
