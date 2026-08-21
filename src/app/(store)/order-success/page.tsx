@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { CheckCircle2, Sparkles } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function OrderSuccessPage() {
-  const orderNumber = `LM${Math.floor(10000 + Math.random() * 90000)}`;
+function OrderSuccessContent() {
+  const searchParams = useSearchParams();
+  const orderNumber = searchParams.get("order") || "TT00000";
 
   return (
     <div className="container mx-auto px-4 py-24 min-h-[70vh] flex items-center justify-center">
@@ -31,10 +36,23 @@ export default function OrderSuccessPage() {
           <p className="font-medium text-lg">3–5 Business Days</p>
         </div>
 
-        <Link href="/shop" className="btn-primary w-full block">
-          Continue Shopping
-        </Link>
+        <div className="flex flex-col gap-3">
+          <Link href="/account/orders" className="btn-secondary w-full block text-center">
+            View My Orders
+          </Link>
+          <Link href="/shop" className="btn-primary w-full block text-center">
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-24 text-center">Loading...</div>}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

@@ -81,10 +81,14 @@ model Product {
 
 model Order {
   id            String   @id @default(cuid())
+  orderNumber   String   @unique
   customerId    String
   date          DateTime @default(now())
+  subtotal      Int      @default(0)
+  discount      Int      @default(0)
+  shipping      Int      @default(0)
   total         Int
-  status        String   // "Pending", "Processing", "Shipped", "Delivered", "Cancelled"
+  status        String   // "PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"
   
   // Snapshots for historical accuracy
   customerName  String

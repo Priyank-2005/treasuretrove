@@ -23,11 +23,15 @@ export interface CreateOrderPaymentInput {
 }
 
 export interface CreateOrderInput {
+  orderNumber: string;
   customerId: string;
   customerName: string;
   customerEmail: string;
   total: number;
   status: string;
+  subtotal?: number;
+  discount?: number;
+  shipping?: number;
   shippingAddress?: Prisma.InputJsonValue;
   items: CreateOrderItemInput[];
   payment?: CreateOrderPaymentInput;
@@ -81,10 +85,14 @@ export async function createOrder(data: CreateOrderInput) {
   try {
     const order = await prisma.order.create({
       data: {
+        orderNumber: data.orderNumber,
         customerId: data.customerId,
         customerName: data.customerName,
         customerEmail: data.customerEmail,
         total: data.total,
+        subtotal: data.subtotal ?? data.total,
+        discount: data.discount ?? 0,
+        shipping: data.shipping ?? 0,
         status: data.status,
         shippingAddress: data.shippingAddress ?? undefined,
         items: {
